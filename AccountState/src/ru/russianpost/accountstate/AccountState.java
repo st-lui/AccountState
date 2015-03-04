@@ -3,7 +3,6 @@ package ru.russianpost.accountstate;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -22,41 +21,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-class SmsMessageData{
-	Date smsDate;
-	String smsBody;
-	
-}
-
 public class AccountState extends Activity {
 	
-	public class SmsMessageData implements Comparable<SmsMessageData>{
-		public Date smsDate;
-		public String Body;
-		
-		public SmsMessageData() {
-			Body=new String();
-			smsDate=new Date();
-		}
-		
-		public SmsMessageData(Date _smsDate,String _smsBody){
-			smsDate=_smsDate;
-			Body=_smsBody; 
-		}
-		
-		public SmsMessageData(Long _smsDate,String _smsBody){
-			smsDate=new Date(_smsDate);
-			Body=_smsBody; 
-		}
-
-		@Override
-		public int compareTo(SmsMessageData another) {
-			return this.smsDate.compareTo(another.smsDate);
-		}
-		
-	}
-
-	public double GetBalance(){
+	private double GetBalance(){
 		Uri uri = Uri.parse("content://sms/inbox");
 		Cursor c= getContentResolver().query(uri, null, null ,null,null);
 		startManagingCursor(c);

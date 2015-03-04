@@ -1,11 +1,17 @@
 package ru.russianpost.accountstate;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.support.v4.content.CursorLoader;
 import android.widget.RemoteViews;
 
 public class AccountStateAppWidgetProvider extends AppWidgetProvider {
@@ -29,7 +35,7 @@ public class AccountStateAppWidgetProvider extends AppWidgetProvider {
 			RemoteViews views = new RemoteViews(context.getPackageName(),
 					R.layout.accountstate_appwidget);
 			views.setOnClickPendingIntent(R.id.appwidget_text, pendingIntent);
-			double balance = new AccountState().GetBalance();
+			double balance = GetBalance(context);
 			views.setTextViewText(R.id.root_layout, ((Double)balance).toString());
 			// Tell the AppWidgetManager to perform an update on the current app
 			// widget
@@ -37,5 +43,59 @@ public class AccountStateAppWidgetProvider extends AppWidgetProvider {
 		}
 
 		super.onUpdate(context, appWidgetManager, appWidgetIds);
+	}
+	private double GetBalance(Context context){
+		Uri uri = Uri.parse("content://sms/inbox");
+		Cursor c= context.getContentResolver().query(uri, null, null ,null,null);
+		CursorLoader cursorLoader = new CursorLoader(context);
+		cursorLoader.deliverResult(c);
+		
+		ArrayList<SmsMessageData> smsMessages = new ArrayList<SmsMessageData>();
+		String number = "";
+		                
+		if(c.moveToFirst()){
+		        for(int i=0;i<c.getCount();i++){
+		                
+		                number=c.getString(c.getColumnIndexOrThrow("address")).toString();
+		                if (number.compareTo("Sviaz-Bank")==0){
+		                	String b = c.getString(c.getColumnIndexOrThrow("body")).toString();
+		                	Long date = c.getLong(c.getColumnIndexOrThrow("date"));
+		                	smsMessages.add(new SmsMessageData(date,b));
+		                }
+		                c.moveToNext();
+		        }
+		}
+		c.close();
+		Object[] sortedSmsMessages =  smsMessages.toArray();
+		Arrays.sort(sortedSmsMessages);
+		int startIndex = sortedSmsMessages.length-1;
+		for (int i=sortedSmsMessages.length-1;i>=0;i--){
+			SmsMessageData smsMessageData = (SmsMessageData) sortedSmsMessages[i];
+			if (smsMessageData.Body.contains("Dostupno")){
+				startIndex=i;
+				break;
+			}
+		}
+		SmsMessageData smsMessageData = (SmsMessageData) sortedSmsMessages[startIndex];
+		String[] bodyData= smsMessageData.Body.split("\\s+");
+		double startBalance=0;
+		for (int i=0;i<bodyData.length;i++){
+			if (bodyData[i].compareTo("Dostupno")==0){
+				startBalance = Double.parseDouble(bodyData[i+1].replace(',','.'));
+			}
+		}
+		for (int i=startIndex+1;i<sortedSmsMessages.length;i++){
+			SmsMessageData sms = (SmsMessageData) sortedSmsMessages[i];
+			if (sms.Body.contains("Summa")){
+				String[] smsData = sms.Body.split("\\s+");
+				for (int j=0;j<smsData.length;j++){
+					if (smsData[j].compareTo("Summa")==0){
+						double changeBalance = Double.parseDouble(smsData[j+1].replace(',','.'));
+						startBalance -=changeBalance;
+					}
+				}
+			}
+		}	
+		return startBalance;
 	}
 }
