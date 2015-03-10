@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.content.Context;
@@ -85,6 +86,6 @@ public class AccountState extends Activity {
 		
 		double startBalance = GetBalance();
 		final TextView textView = (TextView) findViewById(R.id.textView2);
-		textView.setText(((Double)startBalance).toString());
+		textView.setText(String.format(Locale.US,"%1$2G", ((Double)startBalance)));
 	}
 }

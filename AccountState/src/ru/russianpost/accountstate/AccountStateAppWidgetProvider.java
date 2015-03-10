@@ -2,6 +2,7 @@ package ru.russianpost.accountstate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -15,6 +16,16 @@ import android.support.v4.content.CursorLoader;
 import android.widget.RemoteViews;
 
 public class AccountStateAppWidgetProvider extends AppWidgetProvider {
+	private static final String ACTION = "android.provider.Telephony.SMS_RECEIVED";
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		if (intent.getAction().compareTo(ACTION)==0){
+			AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+			int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context,AccountStateAppWidgetProvider.class));
+			this.onUpdate(context, appWidgetManager , appWidgetIds);
+		}
+		super.onReceive(context, intent);
+	};
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager,
 			int[] appWidgetIds) {
@@ -34,9 +45,16 @@ public class AccountStateAppWidgetProvider extends AppWidgetProvider {
 			// to the button
 			RemoteViews views = new RemoteViews(context.getPackageName(),
 					R.layout.accountstate_appwidget);
-			views.setOnClickPendingIntent(R.id.appwidget_text, pendingIntent);
-			double balance = GetBalance(context);
-			views.setTextViewText(R.id.root_layout, ((Double)balance).toString());
+			views.setOnClickPendingIntent(R.id.accountWidgetLayout, pendingIntent);
+			double balance = 0;
+			try{
+				balance = GetBalance(context);
+			}
+			catch (Exception e){                                                                 
+				String s = e.toString();
+				System.err.println(s);
+			}
+			views.setTextViewText(R.id.appwidget_text, String.format(Locale.US,"%1$2G", ((Double)balance)));
 			// Tell the AppWidgetManager to perform an update on the current app
 			// widget
 			appWidgetManager.updateAppWidget(appWidgetId, views);
@@ -44,11 +62,10 @@ public class AccountStateAppWidgetProvider extends AppWidgetProvider {
 
 		super.onUpdate(context, appWidgetManager, appWidgetIds);
 	}
+	
 	private double GetBalance(Context context){
 		Uri uri = Uri.parse("content://sms/inbox");
 		Cursor c= context.getContentResolver().query(uri, null, null ,null,null);
-		CursorLoader cursorLoader = new CursorLoader(context);
-		cursorLoader.deliverResult(c);
 		
 		ArrayList<SmsMessageData> smsMessages = new ArrayList<SmsMessageData>();
 		String number = "";
