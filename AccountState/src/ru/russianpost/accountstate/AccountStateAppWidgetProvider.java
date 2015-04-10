@@ -26,6 +26,7 @@ public class AccountStateAppWidgetProvider extends AppWidgetProvider {
 		}
 		super.onReceive(context, intent);
 	};
+	
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager,
 			int[] appWidgetIds) {
