@@ -50,7 +50,7 @@ public class AccountState extends Activity {
 		int startIndex = sortedSmsMessages.length-1;
 		for (int i=sortedSmsMessages.length-1;i>=0;i--){
 			SmsMessageData smsMessageData = (SmsMessageData) sortedSmsMessages[i];
-			if (smsMessageData.Body.contains("Dostupno")){
+			if (smsMessageData.Body.contains("Доступно")){
 				startIndex=i;
 				break;
 			}
@@ -59,16 +59,16 @@ public class AccountState extends Activity {
 		String[] bodyData= smsMessageData.Body.split("\\s+");
 		double startBalance=0;
 		for (int i=0;i<bodyData.length;i++){
-			if (bodyData[i].compareTo("Dostupno")==0){
+			if (bodyData[i].compareTo("Доступно")==0){
 				startBalance = Double.parseDouble(bodyData[i+1].replace(',','.'));
 			}
 		}
 		for (int i=startIndex+1;i<sortedSmsMessages.length;i++){
 			SmsMessageData sms = (SmsMessageData) sortedSmsMessages[i];
-			if (sms.Body.contains("Summa")){
+			if (sms.Body.contains("Сумма")){
 				String[] smsData = sms.Body.split("\\s+");
 				for (int j=0;j<smsData.length;j++){
-					if (smsData[j].compareTo("Summa")==0){
+					if (smsData[j].compareTo("Сумма")==0){
 						double changeBalance = Double.parseDouble(smsData[j+1].replace(',','.'));
 						startBalance -=changeBalance;
 					}

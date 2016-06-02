@@ -104,10 +104,10 @@ public class AccountStateAppWidgetProvider extends AppWidgetProvider {
 		}
 		for (int i=startIndex+1;i<sortedSmsMessages.length;i++){
 			SmsMessageData sms = (SmsMessageData) sortedSmsMessages[i];
-			if (sms.Body.contains("Summa")){
+			if (sms.Body.contains("Ñóììà")){
 				String[] smsData = sms.Body.split("\\s+");
 				for (int j=0;j<smsData.length;j++){
-					if (smsData[j].compareTo("Summa")==0){
+					if (smsData[j].compareTo("Ñóììà")==0){
 						double changeBalance = Double.parseDouble(smsData[j+1].replace(',','.'));
 						startBalance -=changeBalance;
 					}
